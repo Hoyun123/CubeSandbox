@@ -1,7 +1,7 @@
 ---
 title: opencode_integrations
 author: Hoyun123
-date: 2026-7.5
+date: 2026-07-05
 tags:
   - integration
 lang: en-US

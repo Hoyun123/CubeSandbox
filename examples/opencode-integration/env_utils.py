@@ -21,6 +21,10 @@ PROVIDER_KEY_ENV = {
     "deepseek": "DEEPSEEK_API_KEY",
 }
 
+# Reserved for provider-specific key aliases (e.g. ANTHROPIC_AUTH_TOKEN for
+# anthropic). Currently no aliases are required for OpenCode, but the dict is
+# kept so provider_key_candidates() and build_opencode_env() can grow aliases
+# without changing their call sites.
 PROVIDER_KEY_ALIASES: dict[str, tuple[str, ...]] = {}
 
 PROVIDER_DEFAULT_HOST = {
@@ -40,6 +44,7 @@ PASSTHROUGH_ENV_NAMES = (
     "MOONSHOT_BASE_URL",
     "OPENAI_BASE_URL",
     "ANTHROPIC_BASE_URL",
+    "DEEPSEEK_BASE_URL",
     "ANTHROPIC_MODEL",
     "OPENCODE_CACHE_RETENTION",
     "HTTP_PROXY",

@@ -43,6 +43,9 @@ RUN apt-get update \
 
 # Install OpenCode in its own layer so bumping OPENCODE_VERSION does not
 # invalidate the slow OS + Node.js layer above.
+# --ignore-scripts skips npm postinstall scripts to keep the template image
+# build hermetic and avoid running arbitrary code during image construction;
+# the opencode --version smoke test below still validates the installation.
 RUN npm install -g --ignore-scripts "opencode-ai@${OPENCODE_VERSION}" \
     && opencode --version \
     && npm cache clean --force \
