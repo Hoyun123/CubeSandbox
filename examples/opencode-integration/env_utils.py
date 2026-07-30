@@ -1,6 +1,14 @@
 # Copyright (c) 2026 Tencent Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+"""Environment and CLI helpers for the OpenCode example scripts.
+
+Note: this module intentionally mirrors ``examples/pi-agent-integration/env_utils.py``.
+The two integration examples are kept self-contained so users can copy one without
+pulling in the other. Keep them in sync for shared behavior, or extract a common
+helper under ``examples/_common/`` if the duplication becomes a maintenance burden.
+"""
+
 from __future__ import annotations
 
 import os

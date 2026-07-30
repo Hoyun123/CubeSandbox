@@ -108,7 +108,8 @@ cubemastercli tpl create-from-image \
   --image opencode-cube:latest \
   --writable-layer-size 2G \
   --expose-port 49983 \
-  --probe 49983
+  --probe       49983 \
+  --probe-path  /health
 
 cubemastercli tpl list
 ```
@@ -152,7 +153,8 @@ cubemastercli tpl create-from-image \
   --image project1.tencentcloudcr.com/hoyun_pj/opencode-cube:latest \
   --writable-layer-size 2G \
   --expose-port 49983 \
-  --probe 49983
+  --probe       49983 \
+  --probe-path  /health
 
 cubemastercli tpl list
 ```

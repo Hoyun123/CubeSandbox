@@ -7,6 +7,11 @@ Kept SDK-agnostic (duck-typed on ``sandbox.commands.run`` and the result's
 attributes) so the same helpers work with both the e2b-compatible SDK used by
 ``run_opencode.py`` / ``resume_opencode.py`` and the native ``cubesandbox`` SDK
 used by ``network_policy.py``.
+
+Note: this module intentionally mirrors ``examples/pi-agent-integration/_pi_common.py``.
+The two integration examples are kept self-contained so users can copy one without
+pulling in the other. Keep them in sync for shared behavior, or extract a common
+helper under ``examples/_common/`` if the duplication becomes a maintenance burden.
 """
 
 from __future__ import annotations
