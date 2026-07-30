@@ -98,9 +98,8 @@ cubemastercli tpl create-from-image \
 cubemastercli tpl list
 ```
 
-![注册为Cube模板](./assets/image-1.png)
-
 注册失败原因:
+
 docker build创建了opencode -cube latest
     └── 只有这台服务器能看到
             │
@@ -121,6 +120,7 @@ Agent 会安装大型工具链，提升到 `8G+`。
 
 ### 2.1 注册腾讯云镜像服务
 
+```bash
 # 1. 登录（已提供）
 docker login project1.tencentcloudcr.com --username <your-tcr-username> --password <your-tcr-password>
 
@@ -131,9 +131,8 @@ docker tag opencode-cube:latest project1.tencentcloudcr.com/hoyun_pj/opencode-cu
 docker push project1.tencentcloudcr.com/hoyun_pj/opencode-cube:latest
 
 # 4. 注册Cube模板
-```bash
 cubemastercli tpl create-from-image \
-  --image opencode-cube:latest \
+  --image project1.tencentcloudcr.com/hoyun_pj/opencode-cube:latest \
   --writable-layer-size 2G \
   --expose-port 49983 \
   --probe 49983
@@ -141,8 +140,6 @@ cubemastercli tpl create-from-image \
 cubemastercli tpl list
 ```
 
-![注册成功](./assets/image-2.png)
-![注册成功](./assets/image-3.png)
 ### 3. 配置宿主端驱动
 
 ```bash
@@ -190,7 +187,7 @@ pip install -r requirements.txt
 
 OpenCode 命令以无交互方式构造：`--print` 表示处理完 prompt 即退出（不启动 TUI，否则会在 E2B exec 通道上挂死），配合显式 provider/model 与 `--mode json` 输出机器可读的 JSONL 事件流；`--approve` 是布尔开关，表示本次运行信任沙箱内的项目本地文件，prompt 作为末尾的位置参数传入。两种密钥流转方式共用同一个模板：
 
-**直连方式** —— 逐命令传入密钥。`e2b` 的 `commands.run(envs=...)` 把环境放进 exec 信封，而非 VM 内的持久文件，因此密钥只在该命令执行期间存在：
+**直连方式** —— 逐命令传入密钥。`e2b` 的 `commands.run(envs=...)` 把环境放进 exec 信封，而非 VM 内的持久文件，因此密钥只在该命令执行期间存在。`pi` 是 `opencode-ai` npm 包的默认二进制名；若你的安装不同，可通过 `OPENCODE_CLI` 覆盖，或在代码里使用 `env_utils.opencode_cli()`：
 
 ```python
 result = sandbox.commands.run(
@@ -209,7 +206,7 @@ result = sandbox.commands.run(
 ### 5. 会话持久化（pause / resume）
 
 ```bash
-python resume_pi_agent.py
+python resume_opencode.py
 ```
 
 它在 SDK 层复用了[快照 / 克隆 / 回滚](../snapshot-rollback-clone.md)引擎：
@@ -281,18 +278,23 @@ Moonshot 等 OpenAI 兼容 provider 使用 `Authorization: Bearer` 头。若某 
 ### 无交互调用 OpenCode
 
 ```python
+from env_utils import build_opencode_env, opencode_cli
+
+opencode_env = build_opencode_env()
 cmd = (
-    "cd /workspace && pi --print --mode json "
+    f"cd /workspace && {opencode_cli()} --print --mode json "
     "--provider moonshot --model kimi-latest "
     "--approve 'Inspect the project, run app.py, and summarize the result.'"
 )
-result = sandbox.commands.run(cmd, envs=pi_env, user="root", timeout=900)
+result = sandbox.commands.run(cmd, envs=opencode_env, user="root", timeout=900)
 ```
 
 ### preflight 版本检查
 
 ```python
-version = sandbox.commands.run("pi --version", timeout=60)
+from env_utils import opencode_cli
+
+version = sandbox.commands.run(f"{opencode_cli()} --version", timeout=60)
 ```
 
 ## 注意事项
@@ -320,7 +322,7 @@ version = sandbox.commands.run("pi --version", timeout=60)
 
 ## 参考
 
-- 可运行示例：[`examples/pi-agent-integration`](https://github.com/TencentCloud/CubeSandbox/tree/master/examples/pi-agent-integration)
+- 可运行示例：[`examples/opencode-integration`](https://github.com/TencentCloud/CubeSandbox/tree/master/examples/opencode-integration)
 - 自带镜像：[`docs/guide/tutorials/bring-your-own-image.md`](../tutorials/bring-your-own-image.md)
 - 从镜像构建模板：[`docs/guide/tutorials/template-from-image.md`](../tutorials/template-from-image.md)
 - 快照 / 克隆 / 回滚：[`docs/guide/snapshot-rollback-clone.md`](../snapshot-rollback-clone.md)

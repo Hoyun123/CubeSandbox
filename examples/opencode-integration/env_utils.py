@@ -21,12 +21,6 @@ PROVIDER_KEY_ENV = {
     "deepseek": "DEEPSEEK_API_KEY",
 }
 
-# Reserved for provider-specific key aliases (e.g. ANTHROPIC_AUTH_TOKEN for
-# anthropic). Currently no aliases are required for OpenCode, but the dict is
-# kept so provider_key_candidates() and build_opencode_env() can grow aliases
-# without changing their call sites.
-PROVIDER_KEY_ALIASES: dict[str, tuple[str, ...]] = {}
-
 PROVIDER_DEFAULT_HOST = {
     "moonshot": "api.moonshot.cn",
     "openai": "api.openai.com",
@@ -151,7 +145,7 @@ def require_provider_key(provider: str | None = None) -> str:
 def provider_key_candidates(provider: str) -> tuple[str, ...]:
     provider = provider.strip().lower()
     default_name = PROVIDER_KEY_ENV.get(provider, f"{provider.upper()}_API_KEY")
-    return (default_name, *PROVIDER_KEY_ALIASES.get(provider, ()))
+    return (default_name,)
 
 
 def build_opencode_env(include_secrets: bool = True) -> dict[str, str]:
@@ -198,6 +192,7 @@ def opencode_llm_host(provider: str | None = None) -> str:
         "moonshot": "MOONSHOT_BASE_URL",
         "openai": "OPENAI_BASE_URL",
         "anthropic": "ANTHROPIC_BASE_URL",
+        "deepseek": "DEEPSEEK_BASE_URL",
     }.get(provider_name)
     if base_url_env:
         base_url = os.environ.get(base_url_env)
