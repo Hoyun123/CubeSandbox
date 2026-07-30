@@ -2,8 +2,13 @@
 
 [English](README.md)
 
-在 CubeSandbox MicroVM 内运行 [OpenCode coding agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent)
-——一个终端原生的 AI 编码 Agent。Agent 在隔离、可复现的沙箱内编辑文件、执行命令、访问 LLM API。
+在 CubeSandbox MicroVM 内运行 [OpenCode coding agent](https://www.npmjs.com/package/opencode-ai)
+——通过 `opencode-ai` npm 包安装的终端原生 AI 编码 Agent。Agent 在隔离、可复现的沙箱内编辑文件、执行命令、访问 LLM API。
+
+> **OpenCode 与 Pi 的关系：** OpenCode（`opencode-ai`）与
+> [Pi coding agent](../../docs/guide/integrations/pi-agent.md)（`@earendil-works/pi-coding-agent`）
+> 是两个不同的终端编码 Agent。它们有一定渊源，但发布在不同的 npm 包下、暴露的 CLI 也不同。本示例专门针对 `opencode-ai`；若需集成 Pi，请参考
+> [Pi Agent 示例](../pi-agent-integration)。
 
 本示例包含：
 
@@ -82,7 +87,7 @@ pip install -r requirements.txt
 | `OPENCODE_PROVIDER` / `OPENCODE_MODEL` | OpenCode CLI | 默认 `moonshot` / `kimi-latest` |
 | `MOONSHOT_API_KEY` | `envs=...`（直连）或 CubeEgress 注入（vault） | provider 密钥 |
 | `OPENCODE_LLM_HOST` | `network_policy.py` | 默认拒绝出网下放行的 LLM host |
-| `OPENCODE_CLI` | OpenCode CLI | 若你的安装暴露的二进制名不是 `pi`，可覆盖 |
+| `OPENCODE_CLI` | OpenCode CLI | 若你的安装暴露的二进制名不是 `opencode`，可覆盖 |
 
 ## 4. 单次运行（直连密钥方式）
 
@@ -121,7 +126,7 @@ python network_policy.py
 
 | 现象 | 可能原因 | 处理 |
 |---|---|---|
-| preflight 报 `pi: command not found` | CLI 变更后未重建模板，或二进制名不同 | 重建镜像并重新注册模板，或设置 `OPENCODE_CLI` |
+| preflight 报 `opencode: command not found` | CLI 变更后未重建模板，或二进制名不同 | 重建镜像并重新注册模板，或设置 `OPENCODE_CLI` |
 | provider 鉴权失败 | 密钥未传入（直连）或缺少 inject 规则（vault） | 传 `envs={...}` 或修正规则的 `sni`/`host` |
 | `403 Forbidden - CubeEgress` | 默认拒绝且无匹配放行规则 | 把 LLM host（及所需其他 host）加入规则 |
 | vault 下 OpenCode 报 `Connection error` / TLS 失败 | Node 运行时忽略系统 CA 库，不信任 CubeEgress CA | 示例已设 `NODE_EXTRA_CA_CERTS`；若 CA 在别处用 `OPENCODE_NODE_EXTRA_CA_CERTS` 覆盖 |
@@ -133,4 +138,4 @@ python network_policy.py
 - 集成指南：[`docs/guide/integrations/opencode.md`](../../docs/guide/integrations/opencode.md)
 - 快照 / 克隆 / 回滚：[`docs/guide/snapshot-rollback-clone.md`](../../docs/guide/snapshot-rollback-clone.md)
 - 网络 / 出网策略示例：[`examples/network-policy`](../network-policy)
-- OpenCode coding agent：<https://www.npmjs.com/package/@earendil-works/pi-coding-agent>
+- OpenCode coding agent：<https://www.npmjs.com/package/opencode-ai>

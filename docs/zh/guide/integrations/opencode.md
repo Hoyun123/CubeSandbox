@@ -14,9 +14,14 @@ lang: zh-CN
 
 [English](../../../guide/integrations/opencode.md)
 
-在 CubeSandbox MicroVM 内运行 [OpenCode](https://www.npmjs.com/package/@earendil-works/pi-coding-agent)
-（面向终端的 AI 编码 Agent）。本文覆盖镜像构建、密钥注入、出网管控，以及基于快照的会话持久化，配套的可运行示例位于
+在 CubeSandbox MicroVM 内运行 [OpenCode](https://www.npmjs.com/package/opencode-ai)
+（通过 `opencode-ai` npm 包安装的终端 AI 编码 Agent）。本文覆盖镜像构建、密钥注入、出网管控，以及基于快照的会话持久化，配套的可运行示例位于
 [`examples/opencode-integration`](https://github.com/TencentCloud/CubeSandbox/tree/master/examples/opencode-integration)。
+
+> **OpenCode 与 Pi 的关系：** OpenCode（`opencode-ai`）与
+> [Pi coding agent](../../../guide/integrations/pi-agent.md)（`@earendil-works/pi-coding-agent`）
+> 是两个不同的终端编码 Agent。它们有一定渊源，但发布在 diferentes npm 包下、暴露的 CLI 也不同。本文档专门针对 `opencode-ai`；若需集成 Pi，请参考
+> [Pi Agent 集成指南](../../../guide/integrations/pi-agent.md)。
 
 ## 集成对象与版本
 
@@ -82,7 +87,7 @@ EXPOSE 49983
 ```bash
 docker build --platform linux/amd64 \
   -t opencode-cube:latest \
-  /root/opencode-integration
+  examples/opencode-integration
 ```
 ![OpenCode 在 CubeSandbox 中运行的效果](./assets/image-0.png)
 
@@ -98,9 +103,10 @@ cubemastercli tpl create-from-image \
 cubemastercli tpl list
 ```
 
-注册失败原因:
+注册失败原因：
 
-docker build创建了opencode -cube latest
+```text
+docker build 创建了 opencode-cube:latest
     └── 只有这台服务器能看到
             │
             ▼
@@ -113,8 +119,8 @@ docker build创建了opencode -cube latest
     需要推送到 Cube 平台能访问的仓库
             │
             └── 腾讯云 TCR（同机房，内网快）
+```
 
-            
 任务变为 `READY` 后记下 `template_id`，后续每次 `Sandbox.create()` 都要用它。`4G` 可写层适合中等任务；若
 Agent 会安装大型工具链，提升到 `8G+`。
 
@@ -145,6 +151,8 @@ cubemastercli tpl list
 ```bash
 mkdir -p /root/opencode-integration
 cd /root/opencode-integration
+# 也可以直接在仓库内操作：
+# cd examples/opencode-integration
 cat > .env << 'EOF'
 # CubeSandbox API 配置
 E2B_API_URL=http://127.0.0.1:3000
@@ -187,11 +195,11 @@ pip install -r requirements.txt
 
 OpenCode 命令以无交互方式构造：`--print` 表示处理完 prompt 即退出（不启动 TUI，否则会在 E2B exec 通道上挂死），配合显式 provider/model 与 `--mode json` 输出机器可读的 JSONL 事件流；`--approve` 是布尔开关，表示本次运行信任沙箱内的项目本地文件，prompt 作为末尾的位置参数传入。两种密钥流转方式共用同一个模板：
 
-**直连方式** —— 逐命令传入密钥。`e2b` 的 `commands.run(envs=...)` 把环境放进 exec 信封，而非 VM 内的持久文件，因此密钥只在该命令执行期间存在。`pi` 是 `opencode-ai` npm 包的默认二进制名；若你的安装不同，可通过 `OPENCODE_CLI` 覆盖，或在代码里使用 `env_utils.opencode_cli()`：
+**直连方式** —— 逐命令传入密钥。`e2b` 的 `commands.run(envs=...)` 把环境放进 exec 信封，而非 VM 内的持久文件，因此密钥只在该命令执行期间存在。`opencode` 是 `opencode-ai` npm 包的默认二进制名；若你的安装不同，可通过 `OPENCODE_CLI` 覆盖，或在代码里使用 `env_utils.opencode_cli()`：
 
 ```python
 result = sandbox.commands.run(
-    "cd /workspace && pi --print --mode json --provider moonshot "
+    "cd /workspace && opencode --print --mode json --provider moonshot "
     "--model kimi-latest --approve 'do something'",
     envs={"MOONSHOT_API_KEY": key},
     user="root",
@@ -312,7 +320,7 @@ version = sandbox.commands.run(f"{opencode_cli()} --version", timeout=60)
 
 | 现象 | 可能原因 | 处理 |
 |---|---|---|
-| preflight 报 `pi: command not found` | CLI 变更后未重建模板 | 重建镜像并重新注册模板 |
+| preflight 报 `opencode: command not found` | CLI 变更后未重建模板 | 重建镜像并重新注册模板 |
 | provider 鉴权失败 | 密钥未传入（直连）或缺少 inject 规则（vault） | 传 `envs={"MOONSHOT_API_KEY": ...}` 或修正规则的 `sni`/`host` |
 | `403 Forbidden - CubeEgress` | 默认拒绝且无匹配放行规则 | 把 LLM host（及所需其他 host）加入规则 |
 | vault 下 OpenCode 报 `Connection error` / TLS 失败 | OpenCode 的 Node 运行时忽略系统 CA 库，不信任 CubeEgress CA | 示例已设 `NODE_EXTRA_CA_CERTS`；若 CA 在别处用 `OPENCODE_NODE_EXTRA_CA_CERTS` 覆盖 |
@@ -327,4 +335,4 @@ version = sandbox.commands.run(f"{opencode_cli()} --version", timeout=60)
 - 从镜像构建模板：[`docs/guide/tutorials/template-from-image.md`](../tutorials/template-from-image.md)
 - 快照 / 克隆 / 回滚：[`docs/guide/snapshot-rollback-clone.md`](../snapshot-rollback-clone.md)
 - 密钥保险柜 + 出网管控：[`docs/guide/security-proxy.md`](../security-proxy.md)
-- OpenCode coding agent：<https://www.npmjs.com/package/@earendil-works/pi-coding-agent>
+- OpenCode coding agent：<https://www.npmjs.com/package/opencode-ai>

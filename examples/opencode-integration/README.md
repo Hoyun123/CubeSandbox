@@ -2,10 +2,17 @@
 
 [中文文档](README_zh.md)
 
-Run the [OpenCode coding agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent)
-— a terminal-native AI coding agent — inside a CubeSandbox MicroVM. The agent
-edits files, runs commands, and reaches an LLM API entirely within an isolated,
-reproducible sandbox.
+Run the [OpenCode coding agent](https://www.npmjs.com/package/opencode-ai)
+— a terminal-native AI coding agent installed via the `opencode-ai` npm
+package — inside a CubeSandbox MicroVM. The agent edits files, runs commands,
+and reaches an LLM API entirely within an isolated, reproducible sandbox.
+
+> **OpenCode vs. Pi:** OpenCode (`opencode-ai`) and the
+> [Pi coding agent](../../docs/guide/integrations/pi-agent.md) (`@earendil-works/pi-coding-agent`)
+> are separate terminal coding agents. They share some heritage, but they are
+> published under different npm packages and expose different CLIs. This example
+> is specifically for the `opencode-ai` package; see the
+> [Pi Agent example](../pi-agent-integration) for Pi.
 
 This example ships:
 
@@ -89,7 +96,7 @@ pip install -r requirements.txt
 | `OPENCODE_PROVIDER` / `OPENCODE_MODEL` | OpenCode CLI | `moonshot` / `kimi-latest` by default |
 | `MOONSHOT_API_KEY` | `envs=...` (direct) or CubeEgress inject (vault) | Provider key |
 | `OPENCODE_LLM_HOST` | `network_policy.py` | LLM API host to allow; keep aligned with the provider |
-| `OPENCODE_CLI` | OpenCode CLI | Override the binary name if your install exposes something other than `pi` |
+| `OPENCODE_CLI` | OpenCode CLI | Override the binary name if your install exposes something other than `opencode` |
 
 ## 4. One-shot run (direct key flavor)
 
@@ -146,7 +153,7 @@ allow rules or preinstall those dependencies into the template.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `pi: command not found` in preflight | Template not rebuilt after CLI change, or the binary name differs | Rebuild the image, re-register the template, or set `OPENCODE_CLI` |
+| `opencode: command not found` in preflight | Template not rebuilt after CLI change, or the binary name differs | Rebuild the image, re-register the template, or set `OPENCODE_CLI` |
 | Auth error from the provider | Key not forwarded (direct) or missing inject rule (vault) | Pass `envs={...}` or fix the rule's `sni`/`host` |
 | `403 Forbidden - CubeEgress` | Default-deny with no matching allow rule | Add the LLM host (and any extra hosts) to the rules |
 | `Connection error` / TLS failure from OpenCode on the vault path | OpenCode runs on Node, which ignores the system CA store and won't trust the CubeEgress interception CA | The script sets `NODE_EXTRA_CA_CERTS` to the system bundle; override with `OPENCODE_NODE_EXTRA_CA_CERTS` if your CA lives elsewhere |
@@ -158,4 +165,4 @@ allow rules or preinstall those dependencies into the template.
 - Integration guide: [`docs/guide/integrations/opencode.md`](../../docs/guide/integrations/opencode.md)
 - Snapshot / Clone / Rollback: [`docs/guide/snapshot-rollback-clone.md`](../../docs/guide/snapshot-rollback-clone.md)
 - Network / egress policy examples: [`examples/network-policy`](../network-policy)
-- OpenCode coding agent: <https://www.npmjs.com/package/@earendil-works/pi-coding-agent>
+- OpenCode coding agent: <https://www.npmjs.com/package/opencode-ai>

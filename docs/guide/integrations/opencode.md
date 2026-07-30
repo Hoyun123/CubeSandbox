@@ -14,12 +14,20 @@ lang: en-US
 
 [中文文档](../../zh/guide/integrations/opencode.md)
 
-Run the [OpenCode coding agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent)
-— a terminal-native AI coding agent — inside CubeSandbox MicroVMs. This guide
-covers image build, key injection, egress control, and snapshot-based session
-persistence, and pairs with the runnable
+Run the [OpenCode coding agent](https://www.npmjs.com/package/opencode-ai)
+— a terminal-native AI coding agent installed via the `opencode-ai` npm
+package — inside CubeSandbox MicroVMs. This guide covers image build, key
+injection, egress control, and snapshot-based session persistence, and pairs
+with the runnable
 [`examples/opencode-integration`](https://github.com/TencentCloud/CubeSandbox/tree/master/examples/opencode-integration)
 project.
+
+> **OpenCode vs. Pi:** OpenCode (`opencode-ai`) and the
+> [Pi coding agent](../../guide/integrations/pi-agent.md) (`@earendil-works/pi-coding-agent`)
+> are separate terminal coding agents. They share some heritage, but they are
+> published under different npm packages and expose different CLIs. This guide
+> is specifically for the `opencode-ai` package; see the
+> [Pi Agent Integration Guide](../../guide/integrations/pi-agent.md) for Pi.
 
 ## Integration Target and Version
 
@@ -88,7 +96,7 @@ Build and push:
 ```bash
 docker build --platform linux/amd64 \
   -t opencode-cube:latest \
-  /root/opencode-integration
+  examples/opencode-integration
 ```
 
 ![OpenCode running inside CubeSandbox](../../zh/guide/integrations/assets/image-0.png)
@@ -154,6 +162,8 @@ cubemastercli tpl list
 ```bash
 mkdir -p /root/opencode-integration
 cd /root/opencode-integration
+# Or work directly from the repo:
+# cd examples/opencode-integration
 cat > .env << 'EOF'
 # CubeSandbox API config
 E2B_API_URL=http://127.0.0.1:3000
@@ -204,13 +214,13 @@ Two key-flow flavors share the same template:
 
 **Direct flavor** — forward the key per command. `e2b`'s `commands.run(envs=...)`
 puts the environment into the exec envelope, not into a persistent file inside
-the VM, so the key lives only for the lifetime of that command. `pi` is the
-default binary name exposed by the `opencode-ai` npm package; override via
+the VM, so the key lives only for the lifetime of that command. `opencode` is
+the default binary name exposed by the `opencode-ai` npm package; override via
 `OPENCODE_CLI` or use `env_utils.opencode_cli()` if your installation differs:
 
 ```python
 result = sandbox.commands.run(
-    "cd /workspace && pi --print --mode json --provider moonshot "
+    "cd /workspace && opencode --print --mode json --provider moonshot "
     "--model kimi-latest --approve 'do something'",
     envs={"MOONSHOT_API_KEY": key},
     user="root",
@@ -356,7 +366,7 @@ version = sandbox.commands.run(f"{opencode_cli()} --version", timeout=60)
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `pi: command not found` in preflight | Template not rebuilt after CLI change | Rebuild the image, re-register the template |
+| `opencode: command not found` in preflight | Template not rebuilt after CLI change | Rebuild the image, re-register the template |
 | Provider auth failure | Key not forwarded (direct) or missing inject rule (vault) | Pass `envs={...}` or fix the rule's `sni`/`host` |
 | `403 Forbidden - CubeEgress` | Default-deny with no matching allow rule | Add the LLM host (and any extra hosts) to the rules |
 | `Connection error` / TLS failure from OpenCode (vault) | OpenCode's Node runtime ignores the system CA store, so it won't trust the CubeEgress CA | The example sets `NODE_EXTRA_CA_CERTS`; override with `OPENCODE_NODE_EXTRA_CA_CERTS` if the CA lives elsewhere |
@@ -371,4 +381,4 @@ version = sandbox.commands.run(f"{opencode_cli()} --version", timeout=60)
 - Template from image: [`docs/guide/tutorials/template-from-image.md`](../tutorials/template-from-image.md)
 - Snapshot / Clone / Rollback: [`docs/guide/snapshot-rollback-clone.md`](../snapshot-rollback-clone.md)
 - Credential vault + egress control: [`docs/guide/security-proxy.md`](../security-proxy.md)
-- OpenCode coding agent: <https://www.npmjs.com/package/@earendil-works/pi-coding-agent>
+- OpenCode coding agent: <https://www.npmjs.com/package/opencode-ai>

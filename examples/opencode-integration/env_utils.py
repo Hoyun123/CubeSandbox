@@ -115,10 +115,10 @@ def opencode_workspace() -> str:
 
 
 def opencode_cli() -> str:
-    # The integration docs refer to the tool as "OpenCode" and install the
-    # ``opencode-ai`` npm package, but some builds expose the binary as ``pi``.
-    # Use OPENCODE_CLI to override if your installation differs.
-    return optional("OPENCODE_CLI", "pi")
+    # The ``opencode-ai`` npm package exposes the CLI as ``opencode``.
+    # ``OPENCODE_CLI`` is provided as an escape hatch for custom installs or
+    # wrapper scripts that expose a different binary name.
+    return optional("OPENCODE_CLI", "opencode")
 
 
 def provider_key_name(provider: str | None = None) -> str:
