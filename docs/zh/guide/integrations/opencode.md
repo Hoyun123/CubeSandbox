@@ -20,7 +20,7 @@ lang: zh-CN
 
 > **OpenCode 与 Pi 的关系：** OpenCode（`opencode-ai`）与
 > [Pi coding agent](../../../guide/integrations/pi-agent.md)（`@earendil-works/pi-coding-agent`）
-> 是两个不同的终端编码 Agent。它们有一定渊源，但发布在 diferentes npm 包下、暴露的 CLI 也不同。本文档专门针对 `opencode-ai`；若需集成 Pi，请参考
+> 是两个不同的终端编码 Agent。它们有一定渊源，但发布在不同 npm 包下、暴露的 CLI 也不同。本文档专门针对 `opencode-ai`；若需集成 Pi，请参考
 > [Pi Agent 集成指南](../../../guide/integrations/pi-agent.md)。
 
 ## 集成对象与版本
@@ -89,7 +89,6 @@ docker build --platform linux/amd64 \
   -t opencode-cube:latest \
   examples/opencode-integration
 ```
-![OpenCode 在 CubeSandbox 中运行的效果](./assets/image-0.png)
 
 ### 2. 注册为 Cube 模板
 
@@ -190,7 +189,6 @@ pip install -r requirements.txt
 | `MOONSHOT_BASE_URL` | 传入 exec 环境 | Moonshot 或兼容网关地址 |
 | `OPENCODE_LLM_HOST` | `network_policy.py` | 默认拒绝出网下放行的 LLM host，例如 `api.moonshot.cn` |
 
-![](./assets/image-4.png)
 ### 4. 运行时配置与 API Key 注入
 
 OpenCode 命令以无交互方式构造：`--print` 表示处理完 prompt 即退出（不启动 TUI，否则会在 E2B exec 通道上挂死），配合显式 provider/model 与 `--mode json` 输出机器可读的 JSONL 事件流；`--approve` 是布尔开关，表示本次运行信任沙箱内的项目本地文件，prompt 作为末尾的位置参数传入。两种密钥流转方式共用同一个模板：
